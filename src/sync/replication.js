@@ -3,7 +3,7 @@ import { buildRemoteUrl, buildAuthHeader } from './config.js';
 import { createAuthAdapter } from './auth.js';
 import { resolveConflict, lastWriteWins, hasConflict } from './conflict.js';
 
-export function createReplication(db, config) {
+export function createReplication(db, config, replicationOverrides = {}) {
   const remoteUrl = buildRemoteUrl(config.remoteUrl, config.database);
   const remoteOpts = {};
   const authHeader = buildAuthHeader(config.auth);
@@ -27,6 +27,18 @@ export function createReplication(db, config) {
     batch_size: 100,
     chunks: 10,
   };
+
+  if (replicationOverrides.doc_ids && Array.isArray(replicationOverrides.doc_ids) && replicationOverrides.doc_ids.length > 0) {
+    syncOpts.doc_ids = replicationOverrides.doc_ids;
+  }
+
+  if (replicationOverrides.filter) {
+    syncOpts.filter = replicationOverrides.filter;
+  }
+
+  if (replicationOverrides.query_params) {
+    syncOpts.query_params = replicationOverrides.query_params;
+  }
 
   const sync = db.sync(remote, syncOpts);
 

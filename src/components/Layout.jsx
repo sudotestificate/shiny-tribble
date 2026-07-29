@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Outlet, NavLink } from 'react-router-dom';
+import JournalSwitcher from './JournalSwitcher';
 
 const navItems = [
   { path: '/dashboard', label: 'Dashboard', icon: '📊' },
@@ -65,6 +66,8 @@ function Layout() {
           </button>
           <div className="flex-1" />
           <div className="flex items-center gap-3">
+            <span className="text-sm font-semibold text-primary-700 hidden sm:block">Journal:</span>
+            <JournalSwitcher />
             <span className="text-sm text-gray-500 hidden sm:block">hledger Finance App</span>
           </div>
         </header>
