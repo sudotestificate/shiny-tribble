@@ -3,6 +3,7 @@ import { getTransactions, createTransactionRecord, updateTransaction } from './T
 import { getAllDocuments } from '../services/pouchdb';
 import TransactionList from './TransactionList';
 import TransactionForm from './TransactionForm';
+import { useActiveJournal } from '../hooks/useActiveJournal';
 
 function TransactionsManager() {
   const [transactions, setTransactions] = useState([]);
@@ -12,12 +13,13 @@ function TransactionsManager() {
   const [view, setView] = useState('list');
   const [editingTransaction, setEditingTransaction] = useState(null);
   const [deletingTransaction, setDeletingTransaction] = useState(null);
+  const { activeJournal } = useActiveJournal();
 
   async function loadData() {
     try {
       setError(null);
       const [txList, accountList] = await Promise.all([
-        getTransactions(),
+        getTransactions(activeJournal),
         getAllDocuments('account'),
       ]);
       setTransactions(txList);
@@ -31,7 +33,7 @@ function TransactionsManager() {
 
   useEffect(() => {
     loadData();
-  }, []);
+  }, [activeJournal]);
 
   function handleTransactionCreated() {
     loadData();
@@ -86,7 +88,7 @@ function TransactionsManager() {
         <TransactionForm
           accounts={accounts}
           onSubmit={async (data) => {
-            await createTransactionRecord(data);
+            await createTransactionRecord({ ...data, source_journal: activeJournal });
             handleTransactionCreated();
           }}
           onCancel={() => setView('list')}
