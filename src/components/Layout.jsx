@@ -7,6 +7,7 @@ const navItems = [
   { path: '/transactions', label: 'Transactions', icon: '💸' },
   { path: '/accounts', label: 'Accounts', icon: '🏦' },
   { path: '/journals', label: 'Journals', icon: '📒' },
+  { path: '/preview', label: 'Preview', icon: '👁' },
 ];
 
 function Layout() {
