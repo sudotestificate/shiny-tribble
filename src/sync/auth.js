@@ -21,11 +21,6 @@ export function createAuthAdapter(auth) {
   return {};
 }
 
-export function authenticateRemote(pouchRemote, auth) {
-  const adapterOpts = createAuthAdapter(auth);
-  return pouchRemote;
-}
-
 export function validateAuth(auth) {
   if (!auth) return true;
 

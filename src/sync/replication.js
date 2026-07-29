@@ -1,6 +1,5 @@
 import PouchDB from 'pouchdb';
 import { buildRemoteUrl, buildAuthHeader } from './config.js';
-import { createAuthAdapter } from './auth.js';
 import { resolveConflict, lastWriteWins, hasConflict } from './conflict.js';
 
 export function createReplication(db, config) {
@@ -85,18 +84,14 @@ export async function syncOnce(db, config) {
 }
 
 export async function resolveDocumentConflicts(db, docId) {
-  const doc = await db.get(docId, { openRevs: 'all' });
+  const result = await db.get(docId, { openRevs: 'all' });
 
-  if (!doc || !doc.ok) return null;
+  if (!Array.isArray(result)) return null;
 
-  if (Array.isArray(doc.ok)) {
-    const versions = doc.ok.filter(v => v.ok);
-    if (versions.length <= 1) return versions[0] || null;
+  const entries = result.filter((entry) => entry.ok);
+  if (entries.length === 0) return null;
 
-    return versions.reduce((winner, current) => {
-      return lastWriteWins(winner, current);
-    });
-  }
-
-  return doc;
+  return entries.reduce((winner, entry) => {
+    return lastWriteWins(winner, entry.ok);
+  }, entries[0].ok);
 }

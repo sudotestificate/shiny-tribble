@@ -9,15 +9,10 @@ export function useSyncStatus(syncInstance) {
     retryCount: 0,
   });
 
-  const syncRef = useRef(syncInstance);
   const retryCountRef = useRef(0);
 
   useEffect(() => {
-    syncRef.current = syncInstance;
-  }, [syncInstance]);
-
-  useEffect(() => {
-    if (!syncRef.current) {
+    if (!syncInstance) {
       setStatus((prev) => ({
         ...prev,
         connected: false,
@@ -27,7 +22,7 @@ export function useSyncStatus(syncInstance) {
       return;
     }
 
-    const sync = syncRef.current;
+    const sync = syncInstance;
 
     const onActive = () => {
       retryCountRef.current = 0;
@@ -90,7 +85,7 @@ export function useSyncStatus(syncInstance) {
       sync.off('change', onChange);
       sync.off('complete', onComplete);
     };
-  }, [syncRef.current]);
+  }, [syncInstance]);
 
   const reset = useCallback(() => {
     retryCountRef.current = 0;
