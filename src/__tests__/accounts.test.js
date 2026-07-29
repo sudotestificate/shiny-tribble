@@ -8,7 +8,18 @@ import {
   buildAccountTree,
   calculateAccountBalance,
   getReferencingTransactions,
+  getAccountById,
+  createAccountRecord,
+  updateAccount,
+  deleteAccount,
 } from '../accounts/AccountService';
+import { getAllDocuments, saveDocument, deleteDocument } from '../services/pouchdb';
+
+vi.mock('../services/pouchdb.js', () => ({
+  getAllDocuments: vi.fn(),
+  saveDocument: vi.fn(),
+  deleteDocument: vi.fn(),
+}));
 
 describe('AccountService', () => {
   describe('buildAccountTree', () => {
@@ -184,6 +195,94 @@ describe('Account schema', () => {
       const account = createAccount({ name: `Test ${kind}`, kind, currency: 'USD' });
       const errors = validateAccount(account);
       expect(errors).toEqual([]);
+    });
+  });
+});
+
+describe('AccountService async CRUD', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  describe('getAccountById', () => {
+    it('returns an account when found by _id', async () => {
+      const mockAccount = createAccount({ name: 'Checking', kind: 'asset', currency: 'USD' });
+      getAllDocuments.mockResolvedValue([mockAccount]);
+      const result = await getAccountById(mockAccount._id);
+      expect(result).toEqual(mockAccount);
+    });
+
+    it('returns null when no account matches the id', async () => {
+      getAllDocuments.mockResolvedValue([]);
+      const result = await getAccountById('nonexistent');
+      expect(result).toBeNull();
+    });
+  });
+
+  describe('createAccountRecord', () => {
+    it('creates and saves a valid account', async () => {
+      const mockAccount = createAccount({ name: 'Checking', kind: 'asset', currency: 'USD' });
+      getAllDocuments.mockResolvedValue([]);
+      saveDocument.mockResolvedValue({ ok: true, id: mockAccount._id, rev: '1-abc' });
+      const result = await createAccountRecord({
+        name: 'Checking',
+        kind: 'asset',
+        currency: 'USD',
+      });
+      expect(saveDocument).toHaveBeenCalledTimes(1);
+      expect(result).toEqual({ ok: true, id: mockAccount._id, rev: '1-abc' });
+    });
+
+    it('throws when validation fails', async () => {
+      getAllDocuments.mockResolvedValue([]);
+      await expect(createAccountRecord({ name: '', kind: 'asset', currency: 'USD' }))
+        .rejects.toThrow('Validation failed');
+    });
+  });
+
+  describe('updateAccount', () => {
+    it('updates an existing account and saves it', async () => {
+      const mockAccount = createAccount({ name: 'Checking', kind: 'asset', currency: 'USD' });
+      getAllDocuments.mockResolvedValue([mockAccount]);
+      saveDocument.mockResolvedValue({ ok: true, id: mockAccount._id, rev: '2-def' });
+      const result = await updateAccount(mockAccount._id, { name: 'Checking Updated' });
+      expect(saveDocument).toHaveBeenCalledTimes(1);
+      expect(result).toEqual({ ok: true, id: mockAccount._id, rev: '2-def' });
+    });
+
+    it('throws when account not found', async () => {
+      getAllDocuments.mockResolvedValue([]);
+      await expect(updateAccount('nonexistent', { name: 'New' }))
+        .rejects.toThrow('Account not found');
+    });
+
+    it('throws when validation fails', async () => {
+      const mockAccount = createAccount({ name: 'Checking', kind: 'asset', currency: 'USD' });
+      getAllDocuments.mockResolvedValue([mockAccount]);
+      await expect(updateAccount(mockAccount._id, { name: '' }))
+        .rejects.toThrow('Validation failed');
+    });
+  });
+
+  describe('deleteAccount', () => {
+    it('deletes an account with no referencing transactions', async () => {
+      const mockAccount = createAccount({ name: 'Checking', kind: 'asset', currency: 'USD' });
+      getAllDocuments.mockResolvedValue([mockAccount]);
+      deleteDocument.mockResolvedValue({ ok: true, id: mockAccount._id, rev: '1-abc' });
+      const result = await deleteAccount(mockAccount._id, '1-abc');
+      expect(deleteDocument).toHaveBeenCalledWith(mockAccount._id, '1-abc');
+      expect(result).toEqual({ ok: true, id: mockAccount._id, rev: '1-abc' });
+    });
+
+    it('throws when transactions reference the account', async () => {
+      const mockAccount = createAccount({ name: 'Checking', kind: 'asset', currency: 'USD' });
+      getAllDocuments.mockResolvedValue([mockAccount]);
+      getAllDocuments.mockImplementationOnce(async () => [mockAccount]);
+      getAllDocuments.mockImplementationOnce(async () => [
+        { _id: 'tx1', postings: [{ account: 'Checking', amount: 100, currency: 'USD' }] },
+      ]);
+      await expect(deleteAccount(mockAccount._id, '1-abc'))
+        .rejects.toThrow('Cannot delete account: transactions reference this account');
     });
   });
 });

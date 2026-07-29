@@ -2,7 +2,7 @@ import React from 'react';
 import { buildAccountTree, calculateAccountBalance } from './AccountService';
 
 function AccountNode({ node, transactions, depth = 0 }) {
-  const balance = calculateAccountBalance(node._id, transactions);
+  const balance = calculateAccountBalance(node.name, transactions);
 
   return (
     <div>

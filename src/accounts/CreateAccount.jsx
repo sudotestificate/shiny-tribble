@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ACCOUNT_KINDS } from './AccountService';
+import { createAccountRecord, ACCOUNT_KINDS } from './AccountService';
 
 function CreateAccount({ onAccountCreated, onCancel }) {
   const [name, setName] = useState('');
