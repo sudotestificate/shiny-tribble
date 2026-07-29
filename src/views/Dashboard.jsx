@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { getAllDocuments, saveDocument } from '../services/pouchdb';
 import { createTransaction } from '../schema/transaction';
 import { useActiveJournal } from '../hooks/useActiveJournal';
+import { calculateAccountBalance } from '../accounts/AccountService';
 
 function Dashboard() {
   const [accounts, setAccounts] = useState([]);
@@ -43,11 +44,11 @@ function Dashboard() {
   const expenseAccounts = accounts.filter(a => a.kind === 'expense');
   const equityAccounts = accounts.filter(a => a.kind === 'equity');
 
-  const totalAssets = assetAccounts.reduce((sum, a) => sum + (a.balance || 0), 0);
-  const totalLiabilities = liabilityAccounts.reduce((sum, a) => sum + (a.balance || 0), 0);
-  const totalIncome = incomeAccounts.reduce((sum, a) => sum + (a.balance || 0), 0);
-  const totalExpenses = expenseAccounts.reduce((sum, a) => sum + (a.balance || 0), 0);
-  const totalEquity = equityAccounts.reduce((sum, a) => sum + (a.balance || 0), 0);
+  const totalAssets = assetAccounts.reduce((sum, a) => sum + calculateAccountBalance(a.name, transactions), 0);
+  const totalLiabilities = liabilityAccounts.reduce((sum, a) => sum + calculateAccountBalance(a.name, transactions), 0);
+  const totalIncome = incomeAccounts.reduce((sum, a) => sum + calculateAccountBalance(a.name, transactions), 0);
+  const totalExpenses = expenseAccounts.reduce((sum, a) => sum + calculateAccountBalance(a.name, transactions), 0);
+  const totalEquity = equityAccounts.reduce((sum, a) => sum + calculateAccountBalance(a.name, transactions), 0);
   const netWorth = totalAssets - totalLiabilities + totalIncome - totalExpenses + totalEquity;
 
   const recentTransactions = [...transactions]
