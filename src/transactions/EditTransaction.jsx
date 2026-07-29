@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { updateTransaction, calculateTransactionBalance, isTransactionBalanced } from './TransactionService';
 
 function EditTransaction({ transaction, onTransactionUpdated, onCancel }) {
@@ -42,7 +42,11 @@ function EditTransaction({ transaction, onTransactionUpdated, onCancel }) {
       await updateTransaction(transaction._id, {
         date,
         description: description.trim(),
-        postings: postings.filter(p => p.account && p.currency),
+        postings: postings.map(p => ({
+          account: p.account.trim(),
+          amount: parseFloat(p.amount) || 0,
+          currency: p.currency.trim() || 'USD',
+        })),
       });
       onTransactionUpdated();
     } catch (err) {
@@ -98,6 +102,7 @@ function EditTransaction({ transaction, onTransactionUpdated, onCancel }) {
                   type="text"
                   value={posting.account}
                   onChange={e => updatePosting(index, 'account', e.target.value)}
+                  required
                   placeholder="Account"
                   className="flex-1 border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                 />
@@ -105,6 +110,7 @@ function EditTransaction({ transaction, onTransactionUpdated, onCancel }) {
                   type="number"
                   value={posting.amount}
                   onChange={e => updatePosting(index, 'amount', e.target.value)}
+                  required
                   step="any"
                   placeholder="Amount"
                   className="w-24 border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
@@ -113,7 +119,7 @@ function EditTransaction({ transaction, onTransactionUpdated, onCancel }) {
                   type="text"
                   value={posting.currency}
                   onChange={e => updatePosting(index, 'currency', e.target.value)}
-                  placeholder="Currency"
+                  required
                   className="w-24 border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                 />
                 {postings.length > 1 && (
