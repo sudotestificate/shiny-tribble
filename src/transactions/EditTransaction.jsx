@@ -42,7 +42,7 @@ function EditTransaction({ transaction, onTransactionUpdated, onCancel }) {
       await updateTransaction(transaction._id, {
         date,
         description: description.trim(),
-        postings: postings.filter(p => p.account && p.currency),
+        postings,
       });
       onTransactionUpdated();
     } catch (err) {

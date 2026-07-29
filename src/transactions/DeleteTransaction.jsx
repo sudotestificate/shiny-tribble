@@ -17,7 +17,7 @@ function DeleteTransaction({ transaction, onTransactionDeleted, onCancel }) {
     setDeleting(true);
 
     try {
-      await deleteTransaction(transaction._id, transaction._rev);
+      await deleteTransaction(transaction._id);
       onTransactionDeleted();
     } catch (err) {
       setError(err.message);

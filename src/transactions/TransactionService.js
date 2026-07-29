@@ -2,7 +2,13 @@ import { getAllDocuments, saveDocument, deleteDocument } from '../services/pouch
 import { validateTransaction, createTransaction } from '../schema/transaction';
 
 export async function getTransactions() {
-  return getAllDocuments('transaction');
+  const docs = await getAllDocuments('transaction');
+  return docs.sort((a, b) => {
+    const da = a.date || '';
+    const db = b.date || '';
+    if (da !== db) return da < db ? -1 : da > db ? 1 : 0;
+    return a._id < b._id ? -1 : a._id > b._id ? 1 : 0;
+  });
 }
 
 export async function getTransactionById(id) {
@@ -38,8 +44,12 @@ export async function updateTransaction(id, data) {
   return saveDocument(updated);
 }
 
-export async function deleteTransaction(id, rev) {
-  return deleteDocument(id, rev);
+export async function deleteTransaction(id) {
+  const existing = await getTransactionById(id);
+  if (!existing) {
+    throw new Error('Transaction not found');
+  }
+  return deleteDocument(id, existing._rev);
 }
 
 export function calculateTransactionBalance(postings) {

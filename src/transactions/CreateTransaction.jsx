@@ -34,13 +34,25 @@ function CreateTransaction({ onTransactionCreated, onCancel }) {
     setError(null);
     setSaving(true);
 
+    const invalidAmounts = postings.filter(p => {
+      const amount = parseFloat(p.amount);
+      return isNaN(amount);
+    });
+
+    if (invalidAmounts.length > 0) {
+      const badIndices = invalidAmounts.map((p, i) => `#${postings.indexOf(p) + 1}`).join(', ');
+      setError(`Invalid amount(s) in posting(s) ${badIndices}: please enter a numeric value.`);
+      setSaving(false);
+      return;
+    }
+
     try {
       await createTransactionRecord({
         date,
         description: description.trim(),
         postings: postings.map(p => ({
           account: p.account.trim(),
-          amount: parseFloat(p.amount) || 0,
+          amount: Number(p.amount),
           currency: p.currency.trim() || 'USD',
         })),
       });
