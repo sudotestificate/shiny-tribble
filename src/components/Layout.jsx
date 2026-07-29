@@ -68,9 +68,31 @@ function Layout() {
             <span className="text-sm text-gray-500 hidden sm:block">hledger Finance App</span>
           </div>
         </header>
-        <main className="flex-1 overflow-y-auto p-4 lg:p-6">
+        <main className="flex-1 overflow-y-auto p-4 lg:p-6 pb-24 lg:pb-6">
           <Outlet />
         </main>
+
+        <nav className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-gray-200 lg:hidden">
+          <ul className="flex justify-around">
+            {navItems.map((item) => (
+              <li key={item.path}>
+                <NavLink
+                  to={item.path}
+                  className={({ isActive }) =>
+                    `flex flex-col items-center gap-0.5 px-2 py-2 text-xs font-medium ${
+                      isActive
+                        ? 'text-primary-700'
+                        : 'text-gray-500'
+                    }`
+                  }
+                >
+                  <span className="text-lg">{item.icon}</span>
+                  {item.label}
+                </NavLink>
+              </li>
+            ))}
+          </ul>
+        </nav>
       </div>
     </div>
   );
