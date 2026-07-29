@@ -1,8 +1,12 @@
 import { getAllDocuments, saveDocument, deleteDocument } from '../services/pouchdb';
 import { validateTransaction, createTransaction } from '../schema/transaction';
 
-export async function getTransactions() {
-  return getAllDocuments('transaction');
+export async function getTransactions(journalName = null) {
+  const all = await getAllDocuments('transaction');
+  if (journalName) {
+    return all.filter(t => t.source_journal === journalName);
+  }
+  return all;
 }
 
 export async function getTransactionById(id) {

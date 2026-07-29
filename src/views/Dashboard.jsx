@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getAllDocuments, saveDocument } from '../services/pouchdb';
 import { createTransaction } from '../schema/transaction';
+import { useActiveJournal } from '../hooks/useActiveJournal';
 
 function Dashboard() {
   const [accounts, setAccounts] = useState([]);
@@ -9,6 +10,7 @@ function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
+  const { activeJournal } = useActiveJournal();
 
   const [quickAddType, setQuickAddType] = useState(null);
   const [quickAddDesc, setQuickAddDesc] = useState('');
@@ -24,7 +26,7 @@ function Dashboard() {
           getAllDocuments('transaction'),
         ]);
         setAccounts(accountList);
-        setTransactions(transactionList);
+        setTransactions(transactionList.filter(t => t.source_journal === activeJournal));
       } catch (err) {
         setError(err.message);
       } finally {
@@ -33,7 +35,7 @@ function Dashboard() {
     }
 
     loadData();
-  }, []);
+  }, [activeJournal]);
 
   const assetAccounts = accounts.filter(a => a.kind === 'asset');
   const liabilityAccounts = accounts.filter(a => a.kind === 'liability');
@@ -83,7 +85,7 @@ function Dashboard() {
         date: quickAddDate,
         description: quickAddDesc,
         postings,
-        source_journal: null,
+        source_journal: activeJournal,
         hledger_validated: true,
       });
 

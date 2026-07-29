@@ -34,3 +34,8 @@ export async function deleteDocument(id, rev) {
     throw error;
   }
 }
+
+export async function getDocumentsForJournal(docType, journalName) {
+  const all = await getAllDocuments(docType);
+  return all.filter(doc => doc.source_journal === journalName);
+}
