@@ -1,6 +1,12 @@
-import PouchDB from 'pouchdb';
+import PouchDB from 'pouchdb-browser';
+import PouchDBHttp from 'pouchdb-adapter-http';
+import PouchDBIdb from 'pouchdb-adapter-idb';
 
-export const db = new PouchDB('hledger_journals');
+PouchDB.plugin(PouchDBHttp);
+PouchDB.plugin(PouchDBIdb);
+
+export { PouchDB };
+export const db = new PouchDB('hledger_journals', { adapter: 'idb' });
 
 export async function getAllDocuments(docType) {
   try {

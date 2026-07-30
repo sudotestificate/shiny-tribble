@@ -1,4 +1,4 @@
-import PouchDB from 'pouchdb';
+import { PouchDB } from '../services/pouchdb.js';
 import { buildRemoteUrl, buildAuthHeader } from './config.js';
 import { createAuthAdapter } from './auth.js';
 import { resolveConflict, lastWriteWins, hasConflict } from './conflict.js';
