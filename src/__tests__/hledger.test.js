@@ -135,6 +135,19 @@ describe('importJournal', () => {
     expect(groceryAccount.parent_account).toBe('Expenses');
   });
 
+  it('sets parent_account to the immediate parent name for 3+ level account paths', () => {
+    const content = 'account Assets:Bank:Checking\n  currency: USD\n';
+    const result = importJournal(content, 'default');
+
+    const checkingAccount = result.accounts.find((a) => a.name === 'Checking');
+    expect(checkingAccount).toBeDefined();
+    expect(checkingAccount.parent_account).toBe('Bank');
+
+    const bankAccount = result.accounts.find((a) => a.name === 'Bank');
+    expect(bankAccount).toBeDefined();
+    expect(bankAccount.parent_account).toBe('Assets');
+  });
+
   it('parses account properties (currency, description, kind)', () => {
     const content = 'account Assets:Checking\n  description: My checking account\n  currency: EUR\n  kind: asset\n';
     const result = importJournal(content, 'default');
