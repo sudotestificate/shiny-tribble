@@ -189,7 +189,7 @@ export function importJournal(fileContent, journalId) {
           _id: `account_${name.replace(/[^a-zA-Z0-9_-]/g, '_').toLowerCase()}_${Date.now()}_${i}`,
           type: 'account',
           name,
-          parent_account: parentPath || null,
+          parent_account: parts.length > 1 ? parts[parts.length - 2] : null,
           kind: inferKindFromPath(accountPath),
           currency: 'USD',
           created_at: new Date().toISOString(),
