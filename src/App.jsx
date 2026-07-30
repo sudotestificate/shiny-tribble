@@ -5,7 +5,6 @@ import Dashboard from './views/Dashboard';
 import Transactions from './views/Transactions';
 import Accounts from './views/Accounts';
 import Journals from './views/Journals';
-import Preview from './views/Preview';
 
 function App() {
   return (
@@ -16,7 +15,6 @@ function App() {
         <Route path="transactions" element={<Transactions />} />
         <Route path="accounts" element={<Accounts />} />
         <Route path="journals" element={<Journals />} />
-        <Route path="preview" element={<Preview />} />
       </Route>
     </Routes>
   );
